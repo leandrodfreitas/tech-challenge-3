@@ -1,16 +1,6 @@
 import React from 'react';
-import {
-   View,
-   Text,
-   Image,
-   TouchableOpacity,
-   StyleSheet,
-   SafeAreaView,
-   StatusBar,
-   Linking
-} from 'react-native';
+import {View, Text, Image, TouchableOpacity, StyleSheet, SafeAreaView, StatusBar, Linking} from 'react-native';
 import { useRouter } from 'expo-router';
-// npx expo install @expo/vector-icons
 import { Ionicons } from '@expo/vector-icons';
 
 export default function WelcomeScreen() {
@@ -33,9 +23,7 @@ export default function WelcomeScreen() {
 
             {/* Imagem de destaque */}
             <Image
-               // Substitua pelo caminho da sua imagem
-               // source={require('@/assets/images/bg.png')}
-               source={{ uri: 'https://fcmsantacasasp.edu.br/vemprasanta/wp-content/themes/fcm-new/assets/imgs/landingpage/transformar/hero.jpg' }}
+               source={require('@/assets/images/hero.jpg')}
                style={styles.womanImage}
                resizeMode="cover"
             />
@@ -136,11 +124,11 @@ const styles = StyleSheet.create({
       justifyContent: 'center',
       alignItems: 'center',
       borderWidth: 2,
-      borderColor: '#000000',
+      borderColor: '#28a745',
    },
 
    btnSecondaryText: {
-      color: '#000000',
+      color: '#28a745',
       fontSize: 20,
       fontWeight: '700',
    },
@@ -180,5 +168,5 @@ const styles = StyleSheet.create({
       fontWeight: '700',
       textDecorationLine: 'underline',
    },
-   
+
 });
