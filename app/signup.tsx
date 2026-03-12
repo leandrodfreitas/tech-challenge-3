@@ -1,15 +1,5 @@
 import React, { useState } from 'react';
-import {
-	View,
-	Text,
-	TextInput,
-	TouchableOpacity,
-	StyleSheet,
-	Alert,
-	KeyboardAvoidingView,
-	Platform,
-	ScrollView
-} from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, Image, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
 
 export default function Signup() {
@@ -37,6 +27,14 @@ export default function Signup() {
 				keyboardShouldPersistTaps="handled"
 			>
 				<View style={styles.innerContainer}>
+
+					<View style={{ alignItems: 'center', marginBottom: 30 }}	>
+						<Image
+							source={require('@/assets/images/logo.png')}
+							style={styles.logoImage}
+						/>
+					</View>
+
 					<Text style={styles.title}>Cadastrar Conta</Text>
 
 					<TextInput
@@ -99,11 +97,16 @@ const styles = StyleSheet.create({
 		width: '100%',
 	},
 
+	logoImage: {
+		width: 250,
+		resizeMode: 'contain'
+	},
+
 	title: {
-		fontSize: 28,
+		fontSize: 25,
 		fontWeight: 'bold',
 		marginBottom: 30,
-		color: '#333',
+		color: '#246419',
 		textAlign: 'center'
 	},
 

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
 import { Link, useRouter } from 'expo-router';
 
 export default function Login() {
@@ -19,7 +19,15 @@ export default function Login() {
 			style={styles.container}
 		>
 			<View style={styles.innerContainer}>
-				<Text style={styles.title}>Bem-vindo de volta</Text>
+
+				<View style={{ alignItems: 'center', marginBottom: 30 }}	>
+					<Image
+						source={require('@/assets/images/logo.png')}
+						style={styles.logoImage}
+					/>
+				</View>
+
+				<Text style={styles.title}>Bem-vindo de volta :)</Text>
 
 				<TextInput
 					style={styles.input}
@@ -66,11 +74,16 @@ const styles = StyleSheet.create({
 		padding: 25
 	},
 
+	logoImage: {
+		width: 250,
+		resizeMode: 'contain'
+	},
+
 	title: {
-		fontSize: 28,
+		fontSize: 25,
 		fontWeight: 'bold',
 		marginBottom: 30,
-		color: '#333',
+		color: '#246419',
 		textAlign: 'center'
 	},
 
