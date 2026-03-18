@@ -199,7 +199,7 @@ export const transactionsService = {
   },
 };
 
-export const userService = {
+const userService = {
   async setUserProfile(
     userId: string,
     userData: Omit<User, "id" | "createdAt">,
@@ -247,12 +247,22 @@ export const storageService = {
       const fileName = `${userId}/${Date.now()}_${file.name}`;
       const storageRef = ref(storage, fileName);
 
-      const response = await fetch(file.uri);
-      const blob = await response.blob();
+      let blob: Blob;
+
+      if (file.uri.startsWith("data:") || file.uri.startsWith("file://")) {
+        const response = await fetch(file.uri);
+        blob = await response.blob();
+      } else {
+        blob = new Blob([file.uri], { type: file.type });
+      }
 
       const metadata = {
-        contentType: file.type,
+        contentType: file.type || "image/jpeg",
         cacheControl: "public, max-age=3600",
+        customMetadata: {
+          uploadedBy: userId,
+          uploadedAt: new Date().toISOString(),
+        },
       };
 
       const snapshot = await uploadBytes(storageRef, blob, metadata);
@@ -260,7 +270,18 @@ export const storageService = {
 
       return { downloadUrl, fileName: file.name };
     } catch (error: any) {
-      throw new Error(`Erro ao fazer upload: ${error.message}`);
+      console.error("Upload error:", error);
+      if (error.code === "storage/unauthorized") {
+        throw new Error(
+          "Acesso negado ao Storage. Verifique as permissões do Firebase.",
+        );
+      } else if (error.code === "storage/retry-limit-exceeded") {
+        throw new Error("Timeout ao fazer upload. Tente novamente.");
+      } else {
+        throw new Error(
+          `Erro ao fazer upload: ${error.message || "Erro desconhecido"}`,
+        );
+      }
     }
   },
 
@@ -270,6 +291,7 @@ export const storageService = {
       await deleteObject(fileRef);
       return { success: true };
     } catch (error: any) {
+      console.error("Delete error:", error);
       throw new Error(`Erro ao deletar arquivo: ${error.message}`);
     }
   },

@@ -1,76 +1,77 @@
+import { Icons } from "@/constants/icons";
 import { Category } from "@/types";
 
 export const DEFAULT_CATEGORIES: Category[] = [
   {
     id: "food",
     name: "Alimentação",
-    icon: "🍔",
+    icon: Icons.food,
     color: "#FF6B6B",
   },
   {
     id: "transport",
     name: "Transporte",
-    icon: "🚗",
+    icon: Icons.car,
     color: "#4ECDC4",
   },
   {
     id: "entertainment",
     name: "Entretenimento",
-    icon: "🎬",
+    icon: Icons.movie,
     color: "#FFE66D",
   },
   {
     id: "health",
     name: "Saúde",
-    icon: "⚕️",
+    icon: Icons.health,
     color: "#95E1D3",
   },
   {
     id: "education",
     name: "Educação",
-    icon: "📚",
+    icon: Icons.book,
     color: "#A8D8EA",
   },
   {
     id: "shopping",
     name: "Compras",
-    icon: "🛍️",
+    icon: Icons.shopping,
     color: "#FFB7C5",
   },
   {
     id: "utilities",
     name: "Contas",
-    icon: "💡",
+    icon: Icons.lightbulb,
     color: "#DDA0DD",
   },
   {
     id: "salary",
     name: "Salário",
-    icon: "💰",
+    icon: Icons.money,
     color: "#90EE90",
   },
   {
     id: "freelance",
     name: "Freelance",
-    icon: "💻",
+    icon: Icons.laptop,
     color: "#87CEEB",
   },
   {
     id: "investment",
     name: "Investimentos",
-    icon: "📈",
+    icon: Icons.investment,
     color: "#FFD700",
   },
   {
     id: "other-income",
     name: "Outra Receita",
-    icon: "📊",
+    icon: Icons.charts,
     color: "#C0C0C0",
   },
   {
     id: "other-expense",
     name: "Outras",
-    icon: "📌",
+    icon: Icons.tag,
     color: "#A9A9A9",
   },
 ];
@@ -80,7 +81,7 @@ export function getCategoryById(id: string): Category | undefined {
 }
 
 export function getCategoryIcon(id: string): string {
-  return getCategoryById(id)?.icon || "📌";
+  return getCategoryById(id)?.icon || Icons.tag;
 }
 
 export function getCategoryColor(id: string): string {

@@ -1,17 +1,18 @@
 import ErrorModal from "@/components/ErrorModal";
 import { useAuth } from "@/context/AuthContext";
+import { validators } from "@/utils/validators";
 import { Link, useRouter } from "expo-router";
 import React, { useState } from "react";
 
 import {
-    Image,
-    KeyboardAvoidingView,
-    Platform,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Image,
+  KeyboardAvoidingView,
+  Platform,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 export default function Login() {
@@ -35,9 +36,7 @@ export default function Login() {
       return;
     }
 
-    const emailRegex = /\S+@\S+\.\S+/;
-
-    if (!emailRegex.test(email)) {
+    if (!validators.isValidEmail(email)) {
       showErrorModal("Digite um email válido");
       return;
     }

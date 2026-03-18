@@ -1,19 +1,24 @@
+import Icon from "@/components/Icon";
 import { DEFAULT_CATEGORIES } from "@/constants/categories";
 import { Colors } from "@/constants/colors";
+import { Icons, IconSizes } from "@/constants/icons";
+import { useTransactions } from "@/context/TransactionsContext";
 import { Transaction } from "@/types";
 import { formatters } from "@/utils/formatters";
+import * as ImagePicker from "expo-image-picker";
 import React, { useEffect, useRef, useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    Modal,
-    SafeAreaView,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  Modal,
+  Platform,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import DatePicker from "./DatePicker";
 
@@ -30,8 +35,10 @@ export default function TransactionForm({
   onSave,
   onCancel,
 }: TransactionFormProps) {
+  const { uploadReceipt, deleteReceipt } = useTransactions();
   const isMountedRef = useRef(true);
   const [isLoading, setIsLoading] = useState(false);
+  const [isUploadingReceipt, setIsUploadingReceipt] = useState(false);
   const [type, setType] = useState<"income" | "expense">(
     transaction?.type || "expense",
   );
@@ -45,6 +52,12 @@ export default function TransactionForm({
   );
   const [datePickerOpen, setDatePickerOpen] = useState(false);
   const [showCategoryModal, setShowCategoryModal] = useState(false);
+  const [receiptUrl, setReceiptUrl] = useState<string | undefined>(
+    transaction?.receiptUrl,
+  );
+  const [receiptFileName, setReceiptFileName] = useState<string | undefined>(
+    transaction?.receiptFileName,
+  );
 
   useEffect(() => {
     return () => {
@@ -79,15 +92,17 @@ export default function TransactionForm({
         description,
         type,
         date: selectedDate,
+        ...(receiptUrl && {
+          receiptUrl,
+          receiptFileName: receiptFileName || "receipt",
+        }),
       });
 
-      // Only update state if component is still mounted
       if (isMountedRef.current) {
         setIsLoading(false);
       }
     } catch (error) {
       console.error("Erro ao salvar transação:", error);
-      // Only show alert if component is still mounted
       if (isMountedRef.current) {
         Alert.alert(
           "Erro",
@@ -100,6 +115,80 @@ export default function TransactionForm({
 
   const getCategoryName = (categoryId: string) => {
     return DEFAULT_CATEGORIES.find((c) => c.id === categoryId)?.name || "";
+  };
+
+  const handlePickReceipt = async () => {
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: false,
+        quality: 0.8,
+      });
+
+      if (!result.canceled && result.assets[0]) {
+        const asset = result.assets[0];
+        setIsUploadingReceipt(true);
+
+        try {
+          const fileName = asset.fileName || `receipt_${Date.now()}.jpg`;
+          const url = await uploadReceipt({
+            uri: asset.uri,
+            name: fileName,
+            type: asset.type || "image/jpeg",
+          });
+
+          if (isMountedRef.current) {
+            setReceiptUrl(url);
+            setReceiptFileName(fileName);
+            Alert.alert("Sucesso", "Recibo enviado com sucesso");
+          }
+        } catch (error) {
+          if (isMountedRef.current) {
+            Alert.alert(
+              "Erro",
+              `Falha ao enviar recibo: ${error instanceof Error ? error.message : "Erro desconhecido"}`,
+            );
+          }
+        } finally {
+          if (isMountedRef.current) {
+            setIsUploadingReceipt(false);
+          }
+        }
+      }
+    } catch (error) {
+      Alert.alert("Erro", "Falha ao selecionar imagem");
+    }
+  };
+
+  const handleRemoveReceipt = async () => {
+    if (!receiptUrl) return;
+
+    Alert.alert("Remover Recibo", "Deseja remover o recibo?", [
+      { text: "Cancelar", style: "cancel" },
+      {
+        text: "Remover",
+        style: "destructive",
+        onPress: async () => {
+          try {
+            const url = new URL(receiptUrl);
+            const filePath = url.pathname
+              .split("/o/")[1]
+              ?.split("?")[0]
+              ?.replace(/%2F/g, "/");
+
+            if (filePath) {
+              await deleteReceipt(filePath);
+            }
+
+            setReceiptUrl(undefined);
+            setReceiptFileName(undefined);
+          } catch (error) {
+            setReceiptUrl(undefined);
+            setReceiptFileName(undefined);
+          }
+        },
+      },
+    ]);
   };
 
   return (
@@ -165,7 +254,7 @@ export default function TransactionForm({
             <Text style={styles.categorySelectText}>
               {category ? getCategoryName(category) : "Selecione uma categoria"}
             </Text>
-            <Text style={styles.arrowRight}>›</Text>
+            <Icon name={Icons.arrow} size={IconSizes.medium} color="#666" />
           </TouchableOpacity>
 
           <Modal visible={showCategoryModal} transparent animationType="slide">
@@ -191,7 +280,11 @@ export default function TransactionForm({
                         setShowCategoryModal(false);
                       }}
                     >
-                      <Text style={styles.categoryOptionIcon}>{cat.icon}</Text>
+                      <Icon
+                        name={cat.icon}
+                        size={IconSizes.large}
+                        color="#333"
+                      />
                       <Text style={styles.categoryOptionName}>{cat.name}</Text>
                       {category === cat.id && (
                         <Text style={styles.checkmark}>✓</Text>
@@ -215,6 +308,58 @@ export default function TransactionForm({
             </Text>
             <Text style={styles.calendarIcon}>📅</Text>
           </TouchableOpacity>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Recibo (Opcional)</Text>
+          {Platform.OS === "web" ? (
+            <View style={styles.webNoticeContainer}>
+              <Text style={styles.webNoticeText}>
+                📱 Upload de recibos disponível apenas em dispositivos móveis
+              </Text>
+            </View>
+          ) : receiptUrl ? (
+            <View style={styles.receiptContainer}>
+              <View style={styles.receiptInfo}>
+                <Text style={styles.receiptIcon}>📄</Text>
+                <View style={styles.receiptDetails}>
+                  <Text style={styles.receiptName} numberOfLines={1}>
+                    {receiptFileName}
+                  </Text>
+                  <Text style={styles.receiptUploaded}>
+                    Enviado com sucesso
+                  </Text>
+                </View>
+              </View>
+              <TouchableOpacity
+                style={styles.removeButton}
+                onPress={handleRemoveReceipt}
+              >
+                <Text style={styles.removeButtonText}>✕</Text>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <TouchableOpacity
+              style={[
+                styles.uploadButton,
+                isUploadingReceipt && styles.uploadButtonDisabled,
+              ]}
+              onPress={handlePickReceipt}
+              disabled={isUploadingReceipt}
+            >
+              {isUploadingReceipt ? (
+                <>
+                  <ActivityIndicator size="small" color={Colors.primary} />
+                  <Text style={styles.uploadButtonText}>Enviando...</Text>
+                </>
+              ) : (
+                <>
+                  <Text style={styles.uploadIcon}>📸</Text>
+                  <Text style={styles.uploadButtonText}>Selecionar Recibo</Text>
+                </>
+              )}
+            </TouchableOpacity>
+          )}
         </View>
 
         <View style={styles.section}>
@@ -491,5 +636,90 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "700",
     color: Colors.white,
+  },
+  uploadButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 12,
+    backgroundColor: Colors.background,
+    borderRadius: 8,
+    borderWidth: 2,
+    borderColor: Colors.primary,
+    borderStyle: "dashed",
+    paddingVertical: 16,
+  },
+  uploadButtonDisabled: {
+    opacity: 0.6,
+  },
+  uploadIcon: {
+    fontSize: 24,
+  },
+  uploadButtonText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: Colors.primary,
+  },
+  receiptContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: Colors.primaryLight,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+    borderWidth: 1,
+    borderColor: Colors.primary,
+  },
+  receiptInfo: {
+    flexDirection: "row",
+    alignItems: "center",
+    flex: 1,
+    gap: 12,
+  },
+  receiptIcon: {
+    fontSize: 24,
+  },
+  receiptDetails: {
+    flex: 1,
+  },
+  receiptName: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: Colors.text,
+  },
+  receiptUploaded: {
+    fontSize: 12,
+    color: Colors.primary,
+    marginTop: 2,
+  },
+  removeButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: Colors.white,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  removeButtonText: {
+    fontSize: 18,
+    color: Colors.error,
+    fontWeight: "700",
+  },
+  webNoticeContainer: {
+    backgroundColor: Colors.background,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: Colors.borderLight,
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  webNoticeText: {
+    fontSize: 14,
+    color: Colors.textSecondary,
+    textAlign: "center",
+    fontWeight: "500",
   },
 });
