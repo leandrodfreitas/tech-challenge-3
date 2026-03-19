@@ -1,4 +1,9 @@
 export const validators = {
+  isValidEmail(email: string): boolean {
+    const emailRegex = /\S+@\S+\.\S+/;
+    return emailRegex.test(email);
+  },
+
   isValidAmount(amount: any): boolean {
     const num = parseFloat(amount);
     return !isNaN(num) && num > 0 && num <= 999999.99;

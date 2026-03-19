@@ -1,5 +1,7 @@
+import Icon from "@/components/Icon";
 import { DEFAULT_CATEGORIES } from "@/constants/categories";
 import { Colors } from "@/constants/colors";
+import { Icons, IconSizes } from "@/constants/icons";
 import { TransactionFilter } from "@/types";
 import { formatters } from "@/utils/formatters";
 import React, { useState } from "react";
@@ -71,7 +73,7 @@ export default function FilterBar({ filter, onFilterChange }: FilterBarProps) {
         ]}
         onPress={() => setShowModal(true)}
       >
-        <Text style={styles.filterIcon}>⚙️</Text>
+        <Icon name={Icons.filter} size={IconSizes.medium} color="#333" />
         <Text style={styles.filterText}>
           {hasActiveFilters ? "Filtros Ativos" : "Filtros"}
         </Text>
@@ -102,7 +104,11 @@ export default function FilterBar({ filter, onFilterChange }: FilterBarProps) {
                   ]}
                   onPress={() => toggleType("income")}
                 >
-                  <Text style={styles.typeIcon}>📈</Text>
+                  <Icon
+                    name={Icons.income}
+                    size={IconSizes.large}
+                    color="#28a745"
+                  />
                   <Text style={styles.typeText}>Receita</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
@@ -112,7 +118,11 @@ export default function FilterBar({ filter, onFilterChange }: FilterBarProps) {
                   ]}
                   onPress={() => toggleType("expense")}
                 >
-                  <Text style={styles.typeIcon}>📉</Text>
+                  <Icon
+                    name={Icons.expense}
+                    size={IconSizes.large}
+                    color="#dc3545"
+                  />
                   <Text style={styles.typeText}>Despesa</Text>
                 </TouchableOpacity>
               </View>
@@ -131,7 +141,11 @@ export default function FilterBar({ filter, onFilterChange }: FilterBarProps) {
                     ]}
                     onPress={() => toggleCategory(category.id)}
                   >
-                    <Text style={styles.categoryIcon}>{category.icon}</Text>
+                    <Icon
+                      name={category.icon}
+                      size={IconSizes.large}
+                      color="#333"
+                    />
                     <Text style={styles.categoryName}>{category.name}</Text>
                   </TouchableOpacity>
                 ))}

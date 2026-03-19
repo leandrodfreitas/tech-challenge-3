@@ -1,45 +1,67 @@
-export const mockData = {
-  "1M": [
-    {value: 100},
-    {value: 500},
-    {value: 309},
-    {value: 500},
-    {value: 800},
-    {value: 200},
-    {value: 600},
-    {value: 210},
-    {value: 910}    
-  ],
-  "3M": [
-    {value: 100},
-    {value: 450},
-    {value: 190},
-    {value: 270},
-    {value: 460},
-    {value: 140},
-    {value: 110},
-    {value: 560}
-  ],
-  "6M": [
-    {value: 100},
-    {value: 5000},
-    {value: 190000},
-    {value: 5000},
-    {value: 5000},
-    {value: 86700},
-    {value: 898600},
-    {value: 800},
-    {value: 11000},
-    {value: 50900}
-  ],
-  "12M": [
-    {value: 182},
-    {value: 560},
-    {value: 330},
-    {value: 430},
-    {value: 123},
-    {value: 324},
-    {value: 256},
-    {value: 523}
-  ]
+interface Transaction {
+  id: string;
+  type: "income" | "expense";
+  amount: number;
+  category: string;
+  description: string;
+  date: Date | string;
+  receipt?: string;
+}
+
+export type PeriodType = "1M" | "3M" | "6M" | "12M";
+
+interface ChartDataPoint {
+  value: number;
+}
+
+export const generateChartData = (
+  transactions: Transaction[],
+  type: "income" | "expense",
+  period: PeriodType,
+): ChartDataPoint[] => {
+  const filteredByType = transactions.filter((t) => t.type === type);
+
+  const now = new Date();
+  const monthsMap: { [key in PeriodType]: number } = {
+    "1M": 1,
+    "3M": 3,
+    "6M": 6,
+    "12M": 12,
+  };
+
+  const months = monthsMap[period];
+  const startDate = new Date(now.getFullYear(), now.getMonth() - months, 1);
+
+  const filteredByPeriod = filteredByType.filter((t) => {
+    const transactionDate = new Date(t.date);
+    return transactionDate >= startDate && transactionDate <= now;
+  });
+
+  const grouped: { [key: string]: number } = {};
+
+  filteredByPeriod.forEach((transaction) => {
+    const transactionDate = new Date(transaction.date);
+    let key: string;
+
+    if (period === "1M") {
+      key = transactionDate.toISOString().split("T")[0];
+    } else if (period === "3M" || period === "6M") {
+      const weekStart = new Date(transactionDate);
+      weekStart.setDate(transactionDate.getDate() - transactionDate.getDay());
+      key = weekStart.toISOString().split("T")[0];
+    } else {
+      key =
+        transactionDate.getFullYear() +
+        "-" +
+        String(transactionDate.getMonth() + 1).padStart(2, "0");
+    }
+
+    grouped[key] = (grouped[key] || 0) + transaction.amount;
+  });
+
+  const chartData: ChartDataPoint[] = Object.values(grouped)
+    .sort((a, b) => a - b)
+    .map((value) => ({ value }));
+
+  return chartData.length > 0 ? chartData : [];
 };

@@ -1,9 +1,11 @@
+import Icon from "@/components/Icon";
 import {
-    getCategoryColor,
-    getCategoryIcon,
-    getCategoryName,
+  getCategoryColor,
+  getCategoryIcon,
+  getCategoryName,
 } from "@/constants/categories";
 import { Colors } from "@/constants/colors";
+import { Icons, IconSizes } from "@/constants/icons";
 import { Transaction } from "@/types";
 import { formatters } from "@/utils/formatters";
 import React from "react";
@@ -42,7 +44,11 @@ export default function TransactionCard({
             { backgroundColor: categoryColor + "20" },
           ]}
         >
-          <Text style={styles.iconText}>{categoryIcon}</Text>
+          <Icon
+            name={categoryIcon}
+            size={IconSizes.medium}
+            color={categoryColor}
+          />
         </View>
 
         <View style={styles.infoContainer}>
@@ -60,7 +66,9 @@ export default function TransactionCard({
             {amountPrefix}
             {formatters.formatCurrency(transaction.amount, false)}
           </Text>
-          {transaction.receiptUrl && <Text style={styles.receiptIcon}>📎</Text>}
+          {transaction.receiptUrl && (
+            <Icon name={Icons.receipt} size={IconSizes.medium} color="#666" />
+          )}
         </View>
       </View>
 
@@ -71,7 +79,7 @@ export default function TransactionCard({
               style={[styles.actionButton, styles.editButton]}
               onPress={onEdit}
             >
-              <Text style={styles.actionText}>✏️</Text>
+              <Icon name={Icons.edit} size={IconSizes.medium} color="#1976D2" />
             </TouchableOpacity>
           )}
           {onDelete && (
@@ -80,7 +88,11 @@ export default function TransactionCard({
               onPress={onDelete}
               activeOpacity={0.6}
             >
-              <Text style={styles.actionText}>🗑️</Text>
+              <Icon
+                name={Icons.delete}
+                size={IconSizes.medium}
+                color="#D32F2F"
+              />
             </TouchableOpacity>
           )}
         </View>

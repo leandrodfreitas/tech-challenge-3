@@ -46,7 +46,6 @@ export default function TransactionDetailScreen() {
 
     try {
       await updateTransaction(id, data);
-      // Navigate back to financeiro screen
       router.push("/financeiro");
     } catch (err) {
       console.error("Erro ao atualizar transação:", err);

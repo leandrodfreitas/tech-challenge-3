@@ -24,7 +24,6 @@ export default function AddTransactionScreen() {
 
     try {
       await addTransaction(data);
-      // Navigate back to financeiro screen
       router.push("/financeiro");
     } catch (err) {
       console.error("Erro ao adicionar transação:", err);

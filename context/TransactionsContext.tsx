@@ -64,6 +64,12 @@ export const TransactionsProvider = ({ children }: { children: ReactNode }) => {
   }, [isAuthenticated, user?.email]);
 
   useEffect(() => {
+    if (isAuthenticated && user?.id) {
+      refreshTransactions();
+    }
+  }, [filter]);
+
+  useEffect(() => {
     if (transactions.length > 0) {
       const totalIncome = transactions
         .filter((t) => t.type === "income")

@@ -32,6 +32,11 @@ export default function RootLayout() {
             <Stack.Screen name="financeiro" options={{ headerShown: false }} />
             <Stack.Screen name="receitas" options={{ headerShown: false }} />
             <Stack.Screen name="despesas" options={{ headerShown: false }} />
+            <Stack.Screen name="reports" options={{ headerShown: false }} />
+            <Stack.Screen
+              name="notifications"
+              options={{ headerShown: false }}
+            />
             <Stack.Screen
               name="transaction/add"
               options={{ headerShown: false, presentation: "modal" }}
